@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
-import { StyleSheet, View, Button } from "react-native";
+import { StyleSheet, View, Button, Modal, Text, ScrollView } from "react-native";
 import * as Location from 'expo-location';
 
 const MapScreen = () => {
@@ -12,6 +12,8 @@ const MapScreen = () => {
   });
   const [errorMsg, setErrorMsg] = useState(null);
   const [places, setPlaces] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const userLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -67,6 +69,11 @@ const MapScreen = () => {
     }
   };
 
+  const handleMarkerPress = (place) => {
+    setSelectedPlace(place);
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       <MapView style={styles.map} region={mapRegion}>
@@ -81,10 +88,37 @@ const MapScreen = () => {
             pinColor={getMarkerColor(place.tags.amenity)}
             title={place.tags.name || 'Unnamed Place'}
             description={place.tags.amenity}
+            onPress={() => handleMarkerPress(place)}
           />
         ))}
       </MapView>
       <Button title="Get location" onPress={userLocation} />
+      {selectedPlace && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.modalView}>
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              <Text style={styles.modalText}>{selectedPlace.tags.name || 'Unnamed Place'}</Text>
+              <Text>Amenity: {selectedPlace.tags.amenity}</Text>
+              {selectedPlace.tags.email && <Text>Email: {selectedPlace.tags.email}</Text>}
+              {selectedPlace.tags.phone && <Text>Phone: {selectedPlace.tags.phone}</Text>}
+              {selectedPlace.tags.website && <Text>Website: {selectedPlace.tags.website}</Text>}
+              {selectedPlace.tags.opening_hours && <Text>Opening Hours: {selectedPlace.tags.opening_hours}</Text>}
+              {/* Add more fields as needed */}
+              <Button
+                title="Close"
+                onPress={() => setModalVisible(!modalVisible)}
+              />
+            </ScrollView>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -99,4 +133,28 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  scrollViewContent: {
+    alignItems: 'center',
+  }
 });
