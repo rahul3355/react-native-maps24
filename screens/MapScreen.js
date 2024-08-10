@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { StyleSheet, View, Button, Modal, Text, ScrollView } from "react-native";
 import * as Location from 'expo-location';
+import axios from 'axios';
+import polyline from '@mapbox/polyline';
+
+const MAPBOX_ACCESS_TOKEN = 'YOUR_MAPBOX_ACCESS_TOKEN';
 
 const MapScreen = () => {
   const [mapRegion, setMapRegion] = useState({
@@ -14,6 +18,8 @@ const MapScreen = () => {
   const [places, setPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [travelTime, setTravelTime] = useState('');
 
   const userLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -52,10 +58,6 @@ const MapScreen = () => {
     }
   }
 
-  useEffect(() => {
-    userLocation();
-  }, []);
-
   const getMarkerColor = (amenity) => {
     switch (amenity) {
       case 'hospital':
@@ -69,10 +71,38 @@ const MapScreen = () => {
     }
   };
 
-  const handleMarkerPress = (place) => {
+  const handleMarkerPress = async (place) => {
     setSelectedPlace(place);
     setModalVisible(true);
+    const travelData = await fetchRoute(mapRegion.latitude, mapRegion.longitude, place.lat, place.lon);
+    setRouteCoordinates(travelData.coordinates);
+    setTravelTime(travelData.duration);
   };
+
+  const fetchRoute = async (startLat, startLng, endLat, endLng) => {
+    try {
+      const response = await axios.get(`https://api.mapbox.com/directions/v5/mapbox/driving/${startLng},${startLat};${endLng},${endLat}`, {
+        params: {
+          access_token: 'sk.eyJ1IjoicmFodWxjc3MiLCJhIjoiY2x5enVidXl0MjB2bzJrc2d1ZjZia3IweiJ9.lRhBItOnYWBwlJwYrMZTMQ',
+          geometries: 'polyline',
+          overview: 'full'
+        }
+      });
+
+      const data = response.data.routes[0];
+      const coords = polyline.decode(data.geometry).map(([latitude, longitude]) => ({ latitude, longitude }));
+      const duration = Math.round(data.duration / 60); // duration in minutes
+
+      return { coordinates: coords, duration: `${duration} min` };
+    } catch (error) {
+      console.error(error);
+      return { coordinates: [], duration: '' };
+    }
+  };
+
+  useEffect(() => {
+    userLocation();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -91,6 +121,9 @@ const MapScreen = () => {
             onPress={() => handleMarkerPress(place)}
           />
         ))}
+        {routeCoordinates.length > 0 && (
+          <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
+        )}
       </MapView>
       <Button title="Get location" onPress={userLocation} />
       {selectedPlace && (
@@ -110,7 +143,7 @@ const MapScreen = () => {
               {selectedPlace.tags.phone && <Text>Phone: {selectedPlace.tags.phone}</Text>}
               {selectedPlace.tags.website && <Text>Website: {selectedPlace.tags.website}</Text>}
               {selectedPlace.tags.opening_hours && <Text>Opening Hours: {selectedPlace.tags.opening_hours}</Text>}
-              {/* Add more fields as needed */}
+              {travelTime && <Text>Approx Travel Time: {travelTime}</Text>}
               <Button
                 title="Close"
                 onPress={() => setModalVisible(!modalVisible)}

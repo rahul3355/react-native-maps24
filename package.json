@@ -9,11 +9,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.16.0",
     "@react-navigation/drawer": "^6.7.2",
     "axios": "^1.7.3",
     "expo": "~51.0.24",
     "expo-location": "~17.0.1",
     "expo-status-bar": "~1.12.1",
+    "polyline": "^0.2.0",
     "react": "18.2.0",
     "react-native": "0.74.3",
     "react-native-gesture-handler": "~2.16.1",

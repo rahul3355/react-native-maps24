@@ -5,6 +5,8 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import DashboardScreen from './screens/DashboardScreen';
 import MapScreen from './screens/MapScreen';
+import HeatmapScreen from './screens/HeatmapScreen';
+import CovidMapScreen from './screens/CovidMapScreen';
 
 function HomeScreen({ navigation }) {
   return (
@@ -35,6 +37,10 @@ export default function App() {
         <Drawer.Screen name="Notifications" component={NotificationsScreen} />
         <Drawer.Screen name="Dashboard" component={DashboardScreen}/>
         <Drawer.Screen name="MapScreen" component={MapScreen}/>
+        <Drawer.Screen name="HeatmapScreen" component={HeatmapScreen} />
+        <Drawer.Screen name="CovidMapScreen" component={CovidMapScreen}/>
+        
+        
       </Drawer.Navigator>
     </NavigationContainer>
   );
