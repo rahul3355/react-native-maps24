@@ -7,6 +7,9 @@ import DashboardScreen from './screens/DashboardScreen';
 import MapScreen from './screens/MapScreen';
 import HeatmapScreen from './screens/HeatmapScreen';
 import CovidMapScreen from './screens/CovidMapScreen';
+import ResourceFinderScreen from './screens/ResourceFinderScreen';
+import MentalHealthScreen from './screens/MentalHealthScreen';
+import CovidNewsScreen from './screens/CovidNewsScreen';
 
 function HomeScreen({ navigation }) {
   return (
@@ -39,7 +42,9 @@ export default function App() {
         <Drawer.Screen name="MapScreen" component={MapScreen}/>
         <Drawer.Screen name="HeatmapScreen" component={HeatmapScreen} />
         <Drawer.Screen name="CovidMapScreen" component={CovidMapScreen}/>
-        
+        <Drawer.Screen name="ResourceFinderScreen" component={ResourceFinderScreen}/>
+        <Drawer.Screen name="MentalHealthScreen" component={MentalHealthScreen} />
+        <Drawer.Screen name="CovidNewsScreen" component={CovidNewsScreen} />
         
       </Drawer.Navigator>
     </NavigationContainer>
